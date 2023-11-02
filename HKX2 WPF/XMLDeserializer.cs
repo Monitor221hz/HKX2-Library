@@ -243,18 +243,11 @@ namespace HKX2
         public string ReadString(XElement element, string name)
         {
             // if ele exist it is and empty return empty string (stringptr)
-            // if ele exist it is and '\u2400' return empty (cstring)
+            // if ele exist it is and '\u2400' return null (cstring)
             // if not exist it is SERIALIZE_IGNORED flag (null)
             var ele = GetPropertyElement(element, name);
-            //if (ele is null || ele.Value == "\u2400") return null;
-            if (ele is null) return null;
-            if (ele.Value == "\u2400")
-            {
-                return ""; //has to be empty string literal for some reason?
-			}
-
-
-			return ele.Value.Trim();
+            if (ele is null || ele.Value == "\u2400") return null;
+            return ele.Value.Trim();
         }
 
         public bool ReadBoolean(XElement element, string name)
