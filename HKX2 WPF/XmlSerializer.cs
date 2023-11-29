@@ -60,6 +60,14 @@ namespace HKX2
             return ele;
         }
 
+        public static XElement WriteDetachedNode<T>(T hkobject, string nodeName) where T: IHavokObject
+        {
+			XElement ele = new("hkobject",
+	new XAttribute("name", nodeName),
+	new XAttribute("class", hkobject.GetType().Name),
+	new XAttribute("signature", FormatSignature(hkobject.Signature)));
+			return ele;
+		}
         public void WriteClassPointer<T>(XElement xe, string paramName, T? value) where T : IHavokObject
         {
             if (value is null)
