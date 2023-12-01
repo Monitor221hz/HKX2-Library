@@ -1,5 +1,8 @@
-﻿using System.Xml.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Xml.Linq;
 
+using Type = System.Type;
 namespace HKX2
 {
     public interface IHavokObject
@@ -12,4 +15,7 @@ namespace HKX2
         public void WriteXml(XmlSerializer xs, XElement xe);
         public void ReadXml(XmlDeserializer xd, XElement xe);
     }
+
+
+
 }
