@@ -15,6 +15,10 @@ namespace HKX2
         private XDocument _document;
         private XContainer _dataSection;
 
+        public XmlSerializer()
+        {
+            _serializedObjectsLookup = new Dictionary<IHavokObject, string>();
+        }
         private string GetIndex()
         {
             return "#" + _index++.ToString("D4");
@@ -56,16 +60,18 @@ namespace HKX2
                 new XAttribute("name", nodeName),
                 new XAttribute("class", hkobject.GetType().Name),
                 new XAttribute("signature", FormatSignature(hkobject.Signature)));
-            _dataSection.Add(ele);
+            _dataSection?.Add(ele);
             return ele;
         }
 
-        public static XElement WriteDetachedNode<T>(T hkobject, string nodeName) where T: IHavokObject
+        public XElement WriteDetachedNode<T>(T hkobject, string nodeName) where T: IHavokObject
         {
 			XElement ele = new("hkobject",
 	new XAttribute("name", nodeName),
 	new XAttribute("class", hkobject.GetType().Name),
 	new XAttribute("signature", FormatSignature(hkobject.Signature)));
+			_dataSection?.Add(ele);
+            _serializedObjectsLookup.Add(hkobject, nodeName);
 			return ele;
 		}
         public void WriteClassPointer<T>(XElement xe, string paramName, T? value) where T : IHavokObject
