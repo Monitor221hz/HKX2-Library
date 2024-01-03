@@ -36,11 +36,16 @@ namespace HKX2
             // collect nodes
             foreach (var item in hksection.Elements())
             {
-                var name = item.Attribute("name").Value;
-                _nameXEleMap.Add(name, item);
-            }
+                var name = item.Attribute("name")!.Value;
+#if DEBUG
+				_nameXEleMap.Add(name, item);
+#else
+                if (!_nameXEleMap.ContainsKey(name)) _nameXEleMap.Add(name, item);
+#endif
 
-            var testnode = _nameXEleMap.First(item => item.Value.Attribute("class").Value == "hkRootLevelContainer").Value;
+			}
+
+			var testnode = _nameXEleMap.First(item => item.Value.Attribute("class").Value == "hkRootLevelContainer").Value;
             var rootrefName = testnode.Attribute("name").Value;
             var testobj = ConstructVirtualClass<hkRootLevelContainer>(testnode);
             _objectsNameMap.Add(rootrefName, testobj);
