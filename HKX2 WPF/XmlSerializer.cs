@@ -67,35 +67,49 @@ namespace HKX2
         {            
             string name = hkNode.m_name;
 			XElement ele = new("hkobject");
-			if (!_serializedObjectsLookup.TryGetValue(hkNode, out string? existingName))
+            lock(_serializedObjectsLookup)
             {
-				_dataSection?.Add(ele);
-				_serializedObjectsLookup.Add(hkNode, name);
+				if (!_serializedObjectsLookup.TryGetValue(hkNode, out string? existingName))
+				{
+                    lock(_dataSection)
+                    {
+						_dataSection?.Add(ele);
+					}
+					_serializedObjectsLookup.Add(hkNode, name);
+				}
+				else
+				{
+					name = existingName;
+				}
 			}
-            else
-            {
-                name = existingName;
-            }
+
             ele.Add(new XAttribute("name", name), new XAttribute("class", hkNode.GetType().Name), new XAttribute("signature", FormatSignature(hkNode.Signature)));
 			return ele;
 		}
 		public XElement WriteRegisteredNamedObject<T>(T hkObject, string name) where T : IHavokObject
 		{
 			XElement ele = new("hkobject");
-			if (!_serializedObjectsLookup.TryGetValue(hkObject, out string? existingName))
-			{
-				_dataSection?.Add(ele);
-				_serializedObjectsLookup.Add(hkObject, name);
+            lock(_serializedObjectsLookup)
+            {
+				if (!_serializedObjectsLookup.TryGetValue(hkObject, out string? existingName))
+				{
+                    lock(_dataSection)
+                    {
+						_dataSection?.Add(ele);
+					}
+					_serializedObjectsLookup.Add(hkObject, name);
+				}
+				else
+				{
+					name = existingName;
+				}
 			}
-			else
-			{
-				name = existingName;
-			}
+
 			ele.Add(new XAttribute("name", name), new XAttribute("class", hkObject.GetType().Name), new XAttribute("signature", FormatSignature(hkObject.Signature)));
 			return ele;
 		}
 		/// <summary>
-		/// Deprecated. Use "WriteRegisteredNode" instead to prevent key conflicts and missing references.
+		/// Deprecated. Use "WriteRegisteredNode" instead to prevent key conflicts and missing references. NOT THREAD SAFE.
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <param name="hkobject"></param>
