@@ -76,14 +76,27 @@ namespace HKX2
 			}
 			return ele;
 		}
-        /// <summary>
-        /// Deprecated. Use "WriteRegisteredNode" instead to prevent key conflicts and missing references.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="hkobject"></param>
-        /// <param name="nodeName"></param>
-        /// <returns></returns>
-        public XElement WriteDetachedNode<T>(T hkobject, string nodeName) where T: IHavokObject
+		public XElement WriteRegisteredNamedObject<T>(T hkObject, string nodeName) where T : IHavokObject
+		{
+			XElement ele = new("hkobject",
+				new XAttribute("name", nodeName),
+				new XAttribute("class", hkObject.GetType().Name),
+				new XAttribute("signature", FormatSignature(hkObject.Signature)));
+			if (!_serializedObjectsLookup.ContainsKey(hkObject))
+            {
+				_dataSection?.Add(ele);
+				_serializedObjectsLookup.Add(hkObject, nodeName);
+			}
+			return ele;
+		}
+		/// <summary>
+		/// Deprecated. Use "WriteRegisteredNode" instead to prevent key conflicts and missing references.
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="hkobject"></param>
+		/// <param name="nodeName"></param>
+		/// <returns></returns>
+		public XElement WriteDetachedNode<T>(T hkobject, string nodeName) where T: IHavokObject
         {
 			XElement ele = new("hkobject",
 	            new XAttribute("name", nodeName),
