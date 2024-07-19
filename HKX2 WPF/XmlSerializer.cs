@@ -71,9 +71,12 @@ namespace HKX2
             {
 				if (!_serializedObjectsLookup.TryGetValue(hkNode, out string? existingName))
 				{
-                    lock(_dataSection)
+                    if (_dataSection != null)
                     {
-						_dataSection?.Add(ele);
+						lock (_dataSection)
+						{
+							_dataSection?.Add(ele);
+						}
 					}
 					_serializedObjectsLookup.Add(hkNode, name);
 				}
@@ -93,9 +96,12 @@ namespace HKX2
             {
 				if (!_serializedObjectsLookup.TryGetValue(hkObject, out string? existingName))
 				{
-                    lock(_dataSection)
+                    if (_dataSection != null)
                     {
-						_dataSection?.Add(ele);
+						lock (_dataSection)
+						{
+							_dataSection?.Add(ele);
+						}
 					}
 					_serializedObjectsLookup.Add(hkObject, name);
 				}
