@@ -172,19 +172,22 @@ namespace HKX2
                 WriteString(xe, paramName, "null");
                 return;
             }
-            if (_serializedObjectsLookup.ContainsKey(value))
+            lock(_serializedObjectsLookup)
             {
-                var index = _serializedObjectsLookup[value];
-                var hkparam = WriteString(xe, paramName, index);
-            }
-            else
-            {
-                var defaultName = GetIndex();
-				_serializedObjectsLookup.Add(value, defaultName);
-                WriteString(xe, paramName, defaultName);
-                var element = WriteNode(value, defaultName);
-                value.WriteXml(this, element);
-            }
+				if (_serializedObjectsLookup.ContainsKey(value))
+				{
+					var index = _serializedObjectsLookup[value];
+					var hkparam = WriteString(xe, paramName, index);
+				}
+				else
+				{
+					var defaultName = GetIndex();
+					_serializedObjectsLookup.Add(value, defaultName);
+					WriteString(xe, paramName, defaultName);
+					var element = WriteNode(value, defaultName);
+					value.WriteXml(this, element);
+				}
+			}
         }
 
         public void WriteClassPointerArray<T>(XElement xe, string paramName, IList<T?> values) where T : IHavokObject
@@ -199,13 +202,19 @@ namespace HKX2
                     nameIds.Add("null");
                     continue;
                 }
-                if (_serializedObjectsLookup.ContainsKey(item))
+                lock(_serializedObjectsLookup)
                 {
-                    nameIds.Add(_serializedObjectsLookup[item]);
-                    continue;
-                }
+					if (_serializedObjectsLookup.ContainsKey(item))
+					{
+						nameIds.Add(_serializedObjectsLookup[item]);
+						continue;
+					}
+				}
                 var defaultName = GetIndex();
-                _serializedObjectsLookup.Add(item, defaultName);
+                lock (_serializedObjectsLookup)
+                {
+					_serializedObjectsLookup.Add(item, defaultName);
+				}
                 nameIds.Add(defaultName);
                 var element = WriteNode(item, defaultName);
                 item.WriteXml(this, element);
