@@ -135,28 +135,28 @@ namespace HKX2
 
         public void WriteClassPointerArray<T>(XElement xe, string paramName, IList<T?> values) where T : IHavokObject
         {
-            var indexs = new List<string>();
+            var nameIds = new List<string>();
             var hkparam = WriteParam(xe, paramName);
             hkparam.Add(new XAttribute("numelements", values.Count));
             foreach (var item in values)
             {
                 if (item is null)
                 {
-                    indexs.Add("null");
+                    nameIds.Add("null");
                     continue;
                 }
                 if (_serializedObjectsLookup.ContainsKey(item))
                 {
-                    indexs.Add(_serializedObjectsLookup[item]);
+                    nameIds.Add(_serializedObjectsLookup[item]);
                     continue;
                 }
-                var index = GetIndex();
-                _serializedObjectsLookup.Add(item, index);
-                indexs.Add(index);
-                var node = WriteNode(item, index);
-                item.WriteXml(this, node);
+                var defaultName = item is hkbNode node ? node.m_name : GetIndex();
+                _serializedObjectsLookup.Add(item, defaultName);
+                nameIds.Add(defaultName);
+                var element = WriteNode(item, defaultName);
+                item.WriteXml(this, element);
             }
-            hkparam.Add(new XText(string.Join(" ", indexs)));
+            hkparam.Add(new XText(string.Join(" ", nameIds)));
         }
 
         public void WriteClass<T>(XElement xe, string paramName, T value) where T : IHavokObject
