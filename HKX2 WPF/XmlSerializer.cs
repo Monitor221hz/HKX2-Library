@@ -63,13 +63,32 @@ namespace HKX2
             _dataSection?.Add(ele);
             return ele;
         }
-
+        public XElement WriteRegisteredNode<T>(T hkNode) where T :hkbNode
+        {
+			XElement ele = new("hkobject",
+	new XAttribute("name", hkNode.m_name),
+	new XAttribute("class", hkNode.GetType().Name),
+	new XAttribute("signature", FormatSignature(hkNode.Signature)));
+			if (!_serializedObjectsLookup.ContainsKey(hkNode))
+            {
+				_dataSection?.Add(ele);
+				_serializedObjectsLookup.Add(hkNode, hkNode.m_name);
+			}
+			return ele;
+		}
+        /// <summary>
+        /// Deprecated. Use "WriteRegisteredNode" instead to prevent key conflicts and missing references.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="hkobject"></param>
+        /// <param name="nodeName"></param>
+        /// <returns></returns>
         public XElement WriteDetachedNode<T>(T hkobject, string nodeName) where T: IHavokObject
         {
 			XElement ele = new("hkobject",
-	new XAttribute("name", nodeName),
-	new XAttribute("class", hkobject.GetType().Name),
-	new XAttribute("signature", FormatSignature(hkobject.Signature)));
+	            new XAttribute("name", nodeName),
+	            new XAttribute("class", hkobject.GetType().Name),
+	            new XAttribute("signature", FormatSignature(hkobject.Signature)));
 			_dataSection?.Add(ele);
             _serializedObjectsLookup.Add(hkobject, nodeName);
 			return ele;
