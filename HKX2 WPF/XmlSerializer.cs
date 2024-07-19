@@ -64,29 +64,34 @@ namespace HKX2
             return ele;
         }
         public XElement WriteRegisteredNode<T>(T hkNode) where T :hkbNode
-        {
-			XElement ele = new("hkobject",
-	new XAttribute("name", hkNode.m_name),
-	new XAttribute("class", hkNode.GetType().Name),
-	new XAttribute("signature", FormatSignature(hkNode.Signature)));
-			if (!_serializedObjectsLookup.ContainsKey(hkNode))
+        {            
+            string name = hkNode.m_name;
+			XElement ele = new("hkobject");
+			if (!_serializedObjectsLookup.TryGetValue(hkNode, out string? existingName))
             {
 				_dataSection?.Add(ele);
-				_serializedObjectsLookup.Add(hkNode, hkNode.m_name);
+				_serializedObjectsLookup.Add(hkNode, name);
 			}
+            else
+            {
+                name = existingName;
+            }
+            ele.Add(new XAttribute("name", name), new XAttribute("class", hkNode.GetType().Name), new XAttribute("signature", FormatSignature(hkNode.Signature)));
 			return ele;
 		}
-		public XElement WriteRegisteredNamedObject<T>(T hkObject, string nodeName) where T : IHavokObject
+		public XElement WriteRegisteredNamedObject<T>(T hkObject, string name) where T : IHavokObject
 		{
-			XElement ele = new("hkobject",
-				new XAttribute("name", nodeName),
-				new XAttribute("class", hkObject.GetType().Name),
-				new XAttribute("signature", FormatSignature(hkObject.Signature)));
-			if (!_serializedObjectsLookup.ContainsKey(hkObject))
-            {
+			XElement ele = new("hkobject");
+			if (!_serializedObjectsLookup.TryGetValue(hkObject, out string? existingName))
+			{
 				_dataSection?.Add(ele);
-				_serializedObjectsLookup.Add(hkObject, nodeName);
+				_serializedObjectsLookup.Add(hkObject, name);
 			}
+			else
+			{
+				name = existingName;
+			}
+			ele.Add(new XAttribute("name", name), new XAttribute("class", hkObject.GetType().Name), new XAttribute("signature", FormatSignature(hkObject.Signature)));
 			return ele;
 		}
 		/// <summary>
