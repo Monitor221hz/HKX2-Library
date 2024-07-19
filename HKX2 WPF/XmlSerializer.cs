@@ -125,11 +125,11 @@ namespace HKX2
             }
             else
             {
-                var index = GetIndex();
-                _serializedObjectsLookup.Add(value, index);
-                WriteString(xe, paramName, index);
-                var node = WriteNode(value, index);
-                value.WriteXml(this, node);
+                var defaultName = value is hkbNode node ? node.m_name : GetIndex();
+				_serializedObjectsLookup.Add(value, defaultName);
+                WriteString(xe, paramName, defaultName);
+                var element = WriteNode(value, defaultName);
+                value.WriteXml(this, element);
             }
         }
 
