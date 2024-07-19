@@ -63,6 +63,39 @@ namespace HKX2
             _dataSection?.Add(ele);
             return ele;
         }
+        public XElement WriteDetachedObject<T>(T hkObject) where T : IHavokObject
+        {
+			XElement element = new XElement("hkobject");
+			hkObject.WriteXml(this, element);
+			return element;
+		}
+        public XElement WriteRegisteredObject<T>(T hkObject) where T : IHavokObject
+        {
+			XElement ele = new("hkobject");
+            string name;
+			lock (_serializedObjectsLookup)
+			{
+				if (!_serializedObjectsLookup.TryGetValue(hkObject, out string? existingName))
+				{
+					if (_dataSection != null)
+					{
+						lock (_dataSection)
+						{
+							_dataSection?.Add(ele);
+						}
+					}
+                    name = GetIndex(); 
+					_serializedObjectsLookup.Add(hkObject, name);
+				}
+				else
+				{
+					name = existingName;
+				}
+			}
+			ele.Add(new XAttribute("name", name), new XAttribute("class", hkObject.GetType().Name), new XAttribute("signature", FormatSignature(hkObject.Signature)));
+			hkObject.WriteXml(this, ele);
+			return ele;
+		}
         public XElement WriteRegisteredNode<T>(T hkNode) where T :hkbNode
         {            
             string name = hkNode.m_name;
@@ -87,6 +120,7 @@ namespace HKX2
 			}
 
             ele.Add(new XAttribute("name", name), new XAttribute("class", hkNode.GetType().Name), new XAttribute("signature", FormatSignature(hkNode.Signature)));
+            hkNode.WriteXml(this, ele); 
 			return ele;
 		}
 		public XElement WriteRegisteredNamedObject<T>(T hkObject, string name) where T : IHavokObject
@@ -110,8 +144,8 @@ namespace HKX2
 					name = existingName;
 				}
 			}
-
 			ele.Add(new XAttribute("name", name), new XAttribute("class", hkObject.GetType().Name), new XAttribute("signature", FormatSignature(hkObject.Signature)));
+            hkObject.WriteXml(this, ele); 
 			return ele;
 		}
 		/// <summary>
@@ -145,7 +179,7 @@ namespace HKX2
             }
             else
             {
-                var defaultName = value is hkbNode node ? node.m_name : GetIndex();
+                var defaultName = GetIndex();
 				_serializedObjectsLookup.Add(value, defaultName);
                 WriteString(xe, paramName, defaultName);
                 var element = WriteNode(value, defaultName);
@@ -170,7 +204,7 @@ namespace HKX2
                     nameIds.Add(_serializedObjectsLookup[item]);
                     continue;
                 }
-                var defaultName = item is hkbNode node ? node.m_name : GetIndex();
+                var defaultName = GetIndex();
                 _serializedObjectsLookup.Add(item, defaultName);
                 nameIds.Add(defaultName);
                 var element = WriteNode(item, defaultName);
