@@ -21,7 +21,7 @@ namespace HKX2
         }
         public XmlSerializer(int startIndex)
         {
-            _index  = startIndex;
+            _index  = startIndex + 50;
             _serializedObjectsLookup = new(); 
         }
         private string GetIndex()
