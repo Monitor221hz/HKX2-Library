@@ -17,7 +17,12 @@ namespace HKX2
 
         public XmlSerializer()
         {
-            _serializedObjectsLookup = new Dictionary<IHavokObject, string>();
+            _serializedObjectsLookup = new();
+        }
+        public XmlSerializer(int startIndex)
+        {
+            _index  = startIndex;
+            _serializedObjectsLookup = new(); 
         }
         private string GetIndex()
         {
@@ -172,22 +177,19 @@ namespace HKX2
                 WriteString(xe, paramName, "null");
                 return;
             }
-            lock(_serializedObjectsLookup)
+            if (_serializedObjectsLookup.ContainsKey(value))
             {
-				if (_serializedObjectsLookup.ContainsKey(value))
-				{
-					var index = _serializedObjectsLookup[value];
-					var hkparam = WriteString(xe, paramName, index);
-				}
-				else
-				{
-					var defaultName = GetIndex();
-					_serializedObjectsLookup.Add(value, defaultName);
-					WriteString(xe, paramName, defaultName);
-					var element = WriteNode(value, defaultName);
-					value.WriteXml(this, element);
-				}
-			}
+                var index = _serializedObjectsLookup[value];
+                var hkparam = WriteString(xe, paramName, index);
+            }
+            else
+            {
+                var defaultName = GetIndex();
+				_serializedObjectsLookup.Add(value, defaultName);
+                WriteString(xe, paramName, defaultName);
+                var element = WriteNode(value, defaultName);
+                value.WriteXml(this, element);
+            }
         }
 
         public void WriteClassPointerArray<T>(XElement xe, string paramName, IList<T?> values) where T : IHavokObject
@@ -202,19 +204,13 @@ namespace HKX2
                     nameIds.Add("null");
                     continue;
                 }
-                lock(_serializedObjectsLookup)
+                if (_serializedObjectsLookup.ContainsKey(item))
                 {
-					if (_serializedObjectsLookup.ContainsKey(item))
-					{
-						nameIds.Add(_serializedObjectsLookup[item]);
-						continue;
-					}
-				}
+                    nameIds.Add(_serializedObjectsLookup[item]);
+                    continue;
+                }
                 var defaultName = GetIndex();
-                lock (_serializedObjectsLookup)
-                {
-					_serializedObjectsLookup.Add(item, defaultName);
-				}
+                _serializedObjectsLookup.Add(item, defaultName);
                 nameIds.Add(defaultName);
                 var element = WriteNode(item, defaultName);
                 item.WriteXml(this, element);
