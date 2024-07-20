@@ -128,6 +128,33 @@ namespace HKX2
             hkNode.WriteXml(this, ele); 
 			return ele;
 		}
+        public XElement WriteRegisteredNamedObject<T>(T hkObject, string name, out bool existingReference) where T : IHavokObject
+        {
+			XElement ele = new("hkobject");
+			lock (_serializedObjectsLookup)
+            {
+				if (!_serializedObjectsLookup.TryGetValue(hkObject, out string? existingName))
+				{
+					if (_dataSection != null)
+					{
+						lock (_dataSection)
+						{
+							_dataSection?.Add(ele);
+						}
+					}
+					_serializedObjectsLookup.Add(hkObject, name);
+                    existingReference = false; 
+				}
+				else
+				{
+                    existingReference = true; 
+					name = existingName;
+				}
+			}
+			ele.Add(new XAttribute("name", name), new XAttribute("class", hkObject.GetType().Name), new XAttribute("signature", FormatSignature(hkObject.Signature)));
+			hkObject.WriteXml(this, ele);
+			return ele;
+		}
 		public XElement WriteRegisteredNamedObject<T>(T hkObject, string name) where T : IHavokObject
 		{
 			XElement ele = new("hkobject");
