@@ -1,6 +1,7 @@
 ﻿using HKX2.Utils;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Numerics;
@@ -38,9 +39,12 @@ namespace HKX2
             {
                 var name = item.Attribute("name")!.Value;
 #if DEBUG
-				_nameXEleMap.Add(name, item);
+                if (!_nameXEleMap.TryAdd(name, item))
+                {
+					Debug.WriteLine($"WARN > XmlDeserializer > duplicate name {name}: \n {item.ToString()}");
+				}
 #else
-                if (!_nameXEleMap.ContainsKey(name)) _nameXEleMap.Add(name, item);
+                _nameXEleMap.TryAdd(name, item);
 #endif
 
 			}
