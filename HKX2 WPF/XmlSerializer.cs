@@ -184,7 +184,7 @@ namespace HKX2
             }
             else
             {
-                var defaultName = GetIndex();
+                var defaultName = value is hkbNode node ? node.m_name : GetIndex();
 				_serializedObjectsLookup.Add(value, defaultName);
                 WriteString(xe, paramName, defaultName);
                 var element = WriteNode(value, defaultName);
@@ -197,23 +197,23 @@ namespace HKX2
             var nameIds = new List<string>();
             var hkparam = WriteParam(xe, paramName);
             hkparam.Add(new XAttribute("numelements", values.Count));
-            foreach (var item in values)
+            foreach (var value in values)
             {
-                if (item is null)
+                if (value is null)
                 {
                     nameIds.Add("null");
                     continue;
                 }
-                if (_serializedObjectsLookup.ContainsKey(item))
+                if (_serializedObjectsLookup.ContainsKey(value))
                 {
-                    nameIds.Add(_serializedObjectsLookup[item]);
+                    nameIds.Add(_serializedObjectsLookup[value]);
                     continue;
                 }
-                var defaultName = GetIndex();
-                _serializedObjectsLookup.Add(item, defaultName);
+                var defaultName = value is hkbNode node ? node.m_name : GetIndex();
+				_serializedObjectsLookup.Add(value, defaultName);
                 nameIds.Add(defaultName);
-                var element = WriteNode(item, defaultName);
-                item.WriteXml(this, element);
+                var element = WriteNode(value, defaultName);
+                value.WriteXml(this, element);
             }
             hkparam.Add(new XText(string.Join(" ", nameIds)));
         }
