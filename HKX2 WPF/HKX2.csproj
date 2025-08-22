@@ -4,5 +4,6 @@
     <RootNamespace>HKX2</RootNamespace>
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
+	<InvariantGlobalization>true</InvariantGlobalization>
   </PropertyGroup>
 </Project>
